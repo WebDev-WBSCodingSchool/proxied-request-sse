@@ -53,8 +53,7 @@ form.addEventListener('submit', async e => {
       const reader = response.body.getReader();
       // Create a new TextDecoder
       const decoder = new TextDecoder('utf-8');
-      // Read the stream
-      let result = false;
+      // Variable to store the data result
       let dataResult = '';
       // Create a new paragraph element before the loop
       const p = document.createElement('p');
