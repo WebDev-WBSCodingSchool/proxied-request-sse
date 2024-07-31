@@ -41,6 +41,11 @@ form.addEventListener('submit', async e => {
         ]
       })
     });
+    if (!response.ok) {
+      // If the response is not ok, throw an error by parsing the JSON response
+      const { error } = await response.json();
+      throw new Error(error);
+    }
     // Conditionally process the response depending on the value of `streamValue`
     if (streamValue) {
       // Process stream response
@@ -54,15 +59,24 @@ form.addEventListener('submit', async e => {
       // Create a new paragraph element before the loop
       const p = document.createElement('p');
       resultsContainer.appendChild(p);
+      // Variable to check if the stream is done
+      let isDone = false;
       // While the stream is not closed, i.e. done is false
-      while (!(result = await reader.read()).done) {
+      while (!isDone) {
+        // Read the next chunk
+        const result = await reader.read();
+        // If the result is done, break out of the loop
+        if (result.done) {
+          isDone = true;
+          break;
+        }
         // Decode the result
         const chunk = decoder.decode(result.value, { stream: true });
-        // Split lines by new line
+        // Split lines by new line, you can get more than one line per chunk
         const lines = chunk.split('\n');
         // Loop through each line
         lines.forEach(line => {
-          // Check if the line starts with data:
+          // Check if the line starts with data:, that's how Open AI sends the data
           if (line.startsWith('data:')) {
             // Get the JSON string without the data: prefix
             const jsonStr = line.replace('data:', '');
